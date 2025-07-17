@@ -1,0 +1,75 @@
+package com.employees.employees.application.service;
+
+import static org.assertj.core.api.Assertions.tuple;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import com.employees.employees.domain.Employee;
+import com.employees.employees.domain.Period;
+import com.employees.employees.domain.WorkingPair;
+
+class WorkingPairsServiceTest {
+
+    private final WorkingPairsService workingPairsService = new WorkingPairsService();
+
+    private final LocalDate start = LocalDate.of(2025, 5, 11);
+    private final LocalDate end = start.plusDays(10);
+    private final Employee john = new Employee(1L, 2L, new Period(start, end));
+
+    private final LocalDate start2 = LocalDate.of(2025, 5, 1);
+    private final LocalDate end2 = LocalDate.of(2025, 5, 30);
+    private final Employee henry = new Employee(2L, 2L, new Period(start2, end2));
+
+    private final LocalDate start3 = LocalDate.of(2025, 5, 8);
+    private final LocalDate end3 = LocalDate.of(2025, 5, 20);
+    private final Employee maria = new Employee(3L, 2L, new Period(start3, end3));
+
+    @Test
+    void extractWorkingPairs() {
+
+        final List<WorkingPair> result = workingPairsService.getWorkingPairs(List.of(john, henry, maria));
+
+        Assertions.assertThat(result).hasSize(3);
+        Assertions.assertThat(result)
+                        .extracting(WorkingPair::firstEmployeeId, WorkingPair::secondEmployeeId, WorkingPair::days)
+                                .containsExactly(
+                                        tuple(henry.id(), maria.id(), 12),
+                                        tuple(john.id(), henry.id(), 10),
+                                        tuple(john.id(), maria.id(), 9)
+                                );
+    }
+
+    @Test
+    void calculateOverlappingDaysForTheSamePeriod() {
+        var start = LocalDate.of(2025, 5, 11);
+        var end = start.plusDays(3);
+
+        var period1 = new Period(start, end);
+        var period2 = new Period(start, end);
+
+        final int overlappingDays = workingPairsService.calculateOverlappingDays(period1, period2);
+        Assertions.assertThat(overlappingDays).isEqualTo(3L);
+    }
+
+    @Test
+    void calculateOverlappingDaysFor17Days() {
+        var period1 = new Period(LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 17));
+        var period2 = new Period(LocalDate.of(2025, 4, 10), LocalDate.of(2025, 6, 11));
+
+        final int overlappingDays = workingPairsService.calculateOverlappingDays(period1, period2);
+        Assertions.assertThat(overlappingDays).isEqualTo(6L);
+    }
+
+    @Test
+    void calculateOverlappingDaysForOneDay() {
+        var period1 = new Period(LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 17));
+        var period2 = new Period(LocalDate.of(2025, 5, 8), LocalDate.of(2025, 5, 12));
+
+        final int overlappingDays = workingPairsService.calculateOverlappingDays(period1, period2);
+        Assertions.assertThat(overlappingDays).isEqualTo(1L);
+    }
+}

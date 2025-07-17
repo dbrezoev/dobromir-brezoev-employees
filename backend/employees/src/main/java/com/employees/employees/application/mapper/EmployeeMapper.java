@@ -17,10 +17,10 @@ public class EmployeeMapper {
         return csvRecords
             .stream()
             .map(r -> {
-                LocalDate startDate = LocalDate.parse(r.getDateFrom().trim());
-                LocalDate endDate = Optional.ofNullable(r.getDateTo())
+                var startDate = LocalDate.parse(r.getDateFrom().trim());
+                var endDate = Optional.ofNullable(r.getDateTo())
                         .map(d -> LocalDate.parse(r.getDateFrom().trim()))
-                        .orElse(null);
+                        .orElse(LocalDate.now());
                return new Employee(r.getEmployeeId(), r.getProjectId(), new Period(startDate, endDate)) ;
             })
             .toList();
