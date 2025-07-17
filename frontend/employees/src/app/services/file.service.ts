@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environment/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,13 @@ export class FileService {
 
   test() {
     return this.httpClient.get(this.baseUrl + 'employees')
+  }
+
+  uploadFile(file: File): Observable<any> {
+    const formData: FormData = new FormData();
+
+    formData.append('file', file);
+    return this.httpClient.post<any>(this.baseUrl + 'employees', formData);
   }
 }
 

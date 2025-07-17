@@ -240,6 +240,8 @@
         ]; track item.title) {
 
           <button (click)="test()">TEST NOW</button>
+          <input type="file" (change)="onFileSelected($event)" />
+          <button (click)="onUpload()">Upload</button>
           <a
             class="pill"
             [href]="item.link"

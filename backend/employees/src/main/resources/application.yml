@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: Employees
+
+csv:
+  has-header-row: true
+  separator: ','
