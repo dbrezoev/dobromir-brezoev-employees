@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.employees.employees.application.contract.ContentReader;
+import com.employees.employees.domain.EmployeeCollaboration;
 import com.employees.employees.domain.WorkingPair;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FileContentReader implements ContentReader {
 
-    public List<WorkingPair> read(MultipartFile file, Function<BufferedReader, List<WorkingPair>> processor) {
+    public List<EmployeeCollaboration> read(MultipartFile file, Function<BufferedReader, List<EmployeeCollaboration>> processor) {
         try (BufferedReader csvFileReader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             return processor.apply(csvFileReader);
         } catch (IOException e) {

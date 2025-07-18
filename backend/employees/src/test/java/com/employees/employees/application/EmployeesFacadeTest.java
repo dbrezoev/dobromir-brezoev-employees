@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
+import com.employees.employees.domain.EmployeeCollaboration;
 import com.employees.employees.domain.WorkingPair;
 
 @SpringBootTest
@@ -24,10 +25,10 @@ class EmployeesFacadeTest {
     void calculateWorkingPairs() throws IOException {
         MockMultipartFile mockMultipartFile = prepareFile("src/test/resources/employees1.csv");
 
-        var workingPairs = employeesFacade.calculateWorkingPairs(mockMultipartFile);
+        var workingPairs = employeesFacade.calculateWorkingPairs(mockMultipartFile, "yyyy-MM-dd");
 
         assertThat(workingPairs)
-                .extracting(WorkingPair::firstEmployeeId, WorkingPair::secondEmployeeId, WorkingPair::days)
+                .extracting(EmployeeCollaboration::firstEmployeeId, EmployeeCollaboration::secondEmployeeId, EmployeeCollaboration::totalDays)
                 .containsExactly(
                         tuple(143L, 218L, 4)
                 );
@@ -37,7 +38,7 @@ class EmployeesFacadeTest {
     void calculateWorkingPairsWhenNoOverlap() throws IOException {
         MockMultipartFile mockMultipartFile = prepareFile("src/test/resources/no-overlap.csv");
 
-        var workingPairs = employeesFacade.calculateWorkingPairs(mockMultipartFile);
+        var workingPairs = employeesFacade.calculateWorkingPairs(mockMultipartFile, "yyyy-MM-dd");
 
         assertThat(workingPairs).hasSize(0);
     }

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.employees.employees.domain.Employee;
+import com.employees.employees.domain.EmployeeCollaboration;
 import com.employees.employees.domain.Period;
 import com.employees.employees.domain.WorkingPair;
 
@@ -19,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WorkingPairsService {
 
-    public List<WorkingPair> getWorkingPairs(List<Employee> employees) {
+    public List<EmployeeCollaboration> getWorkingPairs(List<Employee> employees) {
         Map<Long, List<Employee>> groupedByProject = employees
                 .stream()
                 .collect(Collectors.groupingBy(Employee::projectId));
@@ -38,31 +39,50 @@ public class WorkingPairsService {
                     if (overlapDays > 0) {
                         Long firstEmpId = Math.min(e1.id(), e2.id());
                         Long secondEmpId = Math.max(e1.id(), e2.id());
-                        workingPairs.add(new WorkingPair(firstEmpId, secondEmpId, overlapDays));
+                        workingPairs.add(new WorkingPair(firstEmpId, secondEmpId, overlapDays, projectId));
                     }
                 }
             }
         });
 
+        Map<EmployeesPair, List<WorkingPair>> grouped = workingPairs.stream()
+                .collect(Collectors.groupingBy(
+                        wp -> new EmployeesPair(wp.firstEmployeeId(), wp.secondEmployeeId())
+                ));
 
-        Map<EmployeesPair, Integer> mergedSameEmployees = workingPairs
-            .stream()
-            .collect(Collectors.toMap(
-                    wp -> new EmployeesPair(wp.firstEmployeeId(), wp.secondEmployeeId()),
-                    WorkingPair::days,
-                    Integer::sum
-            ));
+        List<EmployeeCollaboration> result = grouped.entrySet().stream()
+                .map(entry -> {
+                    EmployeesPair pair = entry.getKey();
+                    List<WorkingPair> pairs = entry.getValue();
 
-        return mergedSameEmployees
-                .entrySet()
-                .stream()
-                .map(e -> {
-                    long firstEmployeeId = e.getKey().firstEmployeeId();
-                    long secondEmployeeId = e.getKey().secondEmployeeId();
-                    return new WorkingPair(Math.min(firstEmployeeId, secondEmployeeId), Math.max(firstEmployeeId, secondEmployeeId), e.getValue());
+                    int totalDays = pairs.stream().mapToInt(WorkingPair::days).sum();
+                    List<Long> projectIds = pairs.stream().map(WorkingPair::projectId).distinct().toList();
+
+                    return new EmployeeCollaboration(pair.firstEmployeeId(), pair.secondEmployeeId(), totalDays, projectIds);
                 })
-                .sorted(Comparator.comparingInt(WorkingPair::days).reversed())
+                .sorted(Comparator.comparingInt(EmployeeCollaboration::totalDays).reversed())
                 .toList();
+
+        return result;
+
+//        Map<EmployeesPair, Integer> mergedSameEmployees = workingPairs
+//            .stream()
+//            .collect(Collectors.toMap(
+//                    wp -> new EmployeesPair(wp.firstEmployeeId(), wp.secondEmployeeId()),
+//                    WorkingPair::days,
+//                    Integer::sum
+//            ));
+//
+//        return mergedSameEmployees
+//                .entrySet()
+//                .stream()
+//                .map(e -> {
+//                    long firstEmployeeId = e.getKey().firstEmployeeId();
+//                    long secondEmployeeId = e.getKey().secondEmployeeId();
+//                    return new WorkingPair(Math.min(firstEmployeeId, secondEmployeeId), Math.max(firstEmployeeId, secondEmployeeId), e.getValue());
+//                })
+//                .sorted(Comparator.comparingInt(WorkingPair::days).reversed())
+//                .toList();
     }
 
     private record EmployeesPair(long firstEmployeeId,  long secondEmployeeId) {}

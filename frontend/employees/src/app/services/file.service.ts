@@ -17,10 +17,11 @@ export class FileService {
     return this.httpClient.get(this.baseUrl + 'employees')
   }
 
-  uploadFile(file: File): Observable<any> {
+  uploadFile(file: File, dateFormat: string): Observable<any> {
     const formData: FormData = new FormData();
 
     formData.append('file', file);
+    formData.append('dateFormat', dateFormat);
     return this.httpClient.post<any>(this.baseUrl + 'employees', formData);
   }
 }

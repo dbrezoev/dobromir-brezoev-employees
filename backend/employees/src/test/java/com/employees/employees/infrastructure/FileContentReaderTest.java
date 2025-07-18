@@ -14,13 +14,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.employees.employees.domain.EmployeeCollaboration;
 import com.employees.employees.domain.WorkingPair;
 
 @ExtendWith(MockitoExtension.class)
 class FileContentReaderTest {
 
     private final FileContentReader fileContentReader = new FileContentReader();
-    private final Function<BufferedReader, List<WorkingPair>> noop = reader -> List.of();
+    private final Function<BufferedReader, List<EmployeeCollaboration>> noop = reader -> List.of();
 
     @Test
     void readNotExistingFileShouldThrow() throws IOException {

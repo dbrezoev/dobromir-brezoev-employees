@@ -12,7 +12,7 @@ import com.employees.employees.application.parser.CsvParser;
 import com.employees.employees.application.parser.CsvRecord;
 import com.employees.employees.application.service.WorkingPairsService;
 import com.employees.employees.domain.Employee;
-import com.employees.employees.domain.WorkingPair;
+import com.employees.employees.domain.EmployeeCollaboration;
 import com.employees.employees.infrastructure.FileContentReader;
 
 import lombok.RequiredArgsConstructor;
@@ -26,13 +26,13 @@ public class EmployeesFacade {
     private final EmployeeMapper employeeMapper;
     private final WorkingPairsService workingPairsService;
 
-    public List<WorkingPair> calculateWorkingPairs(MultipartFile file) {
-        return contentReader.read(file, this::getWorkingPairs);
+    public List<EmployeeCollaboration> calculateWorkingPairs(MultipartFile file, String dateFormat) {
+        return contentReader.read(file, reader -> getWorkingPairs(reader, dateFormat));
     }
 
-    private List<WorkingPair> getWorkingPairs(BufferedReader reader) {
+    private List<EmployeeCollaboration> getWorkingPairs(BufferedReader reader, String dateFormat) {
         List<CsvRecord> csvRecords = csvParser.parse(reader, csvConfig);
-        List<Employee> employees = employeeMapper.fromCsvRecords(csvRecords);
+        List<Employee> employees = employeeMapper.fromCsvRecords(csvRecords, dateFormat);
         return workingPairsService.getWorkingPairs(employees);
     }
 

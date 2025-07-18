@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.employees.employees.domain.WorkingPair;
+import com.employees.employees.domain.EmployeeCollaboration;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,11 +26,12 @@ public class EmployeesController {
     }
 
     @PostMapping
-    public ResponseEntity<List<WorkingPair>> upload(@RequestParam MultipartFile file) {
+    public ResponseEntity<List<EmployeeCollaboration>> upload(@RequestParam MultipartFile file,
+                                                              @RequestParam(defaultValue = "yyyy-MM-dd") String dateFormat) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
 
-        return ResponseEntity.ok(facade.calculateWorkingPairs(file));
+        return ResponseEntity.ok(facade.calculateWorkingPairs(file, dateFormat));
     }
 }

@@ -243,6 +243,16 @@
           <input type="file" (change)="onFileSelected($event)" />
           <button (click)="onUpload()">Upload</button>
 
+          <label for="dateFormat">Select date format:</label>
+          <select class="form-select" [(ngModel)]="selectedFormat" name="dateFormat" id="dateFormat">
+            @for (format of dateFormats; track format) {
+              <option [value]="format.dateFormat">
+                {{ format.label }}
+              </option>
+            }
+          </select>
+
+
           <div class="mb-3">
             <label for="formFile" class="form-label">Default file input example</label>
             <input class="form-control" type="file" id="formFile" (change)="onFileSelected($event)">
