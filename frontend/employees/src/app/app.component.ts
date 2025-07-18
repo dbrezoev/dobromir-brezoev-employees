@@ -30,7 +30,7 @@ export class AppComponent {
   }
 
   onUpload(): void {
-    if (!this.selectedFile()) return;
+    // if (!this.selectedFile()) return;
 
     this.fileService.uploadFile(this.selectedFile())
       .subscribe((res) => {

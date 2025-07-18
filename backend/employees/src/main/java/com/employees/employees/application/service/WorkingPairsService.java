@@ -1,6 +1,5 @@
 package com.employees.employees.application.service;
 
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,10 +20,12 @@ import lombok.RequiredArgsConstructor;
 public class WorkingPairsService {
 
     public List<WorkingPair> getWorkingPairs(List<Employee> employees) {
-        Map<Long, List<Employee>> groupedByProject = employees.stream()
+        Map<Long, List<Employee>> groupedByProject = employees
+                .stream()
                 .collect(Collectors.groupingBy(Employee::projectId));
 
         List<WorkingPair> workingPairs = new ArrayList<>();
+
         groupedByProject.forEach((projectId, projectEmployees) -> {
             for (int i = 0; i < projectEmployees.size(); i++) {
                 Employee e1 = projectEmployees.get(i);
@@ -35,26 +36,44 @@ public class WorkingPairsService {
                     int overlapDays = calculateOverlappingDays(e1.period(), e2.period());
 
                     if (overlapDays > 0) {
-                        workingPairs.add(new WorkingPair(e1.id(), e2.id(), overlapDays));
+                        Long firstEmpId = Math.min(e1.id(), e2.id());
+                        Long secondEmpId = Math.max(e1.id(), e2.id());
+                        workingPairs.add(new WorkingPair(firstEmpId, secondEmpId, overlapDays));
                     }
                 }
             }
         });
 
-        return workingPairs.stream()
+
+        Map<EmployeesPair, Integer> mergedSameEmployees = workingPairs
+            .stream()
+            .collect(Collectors.toMap(
+                    wp -> new EmployeesPair(wp.firstEmployeeId(), wp.secondEmployeeId()),
+                    WorkingPair::days,
+                    Integer::sum
+            ));
+
+        return mergedSameEmployees
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    long firstEmployeeId = e.getKey().firstEmployeeId();
+                    long secondEmployeeId = e.getKey().secondEmployeeId();
+                    return new WorkingPair(Math.min(firstEmployeeId, secondEmployeeId), Math.max(firstEmployeeId, secondEmployeeId), e.getValue());
+                })
                 .sorted(Comparator.comparingInt(WorkingPair::days).reversed())
                 .toList();
     }
 
-    public int calculateOverlappingDays(Period period1, Period period2) {
-        var start = period1.startDate().isAfter(period2.startDate()) ? period1.startDate() : period2.startDate();
-        var end = period1.endDate().isBefore(period2.endDate()) ? period1.endDate() : period2.endDate();
+    private record EmployeesPair(long firstEmployeeId,  long secondEmployeeId) {}
+
+    public int calculateOverlappingDays(Period firstPeriod, Period secondPeriod) {
+        var start = firstPeriod.startDate().isAfter(secondPeriod.startDate()) ? firstPeriod.startDate() : secondPeriod.startDate();
+        var end = firstPeriod.endDate().isBefore(secondPeriod.endDate()) ? firstPeriod.endDate() : secondPeriod.endDate();
 
         if (start.isAfter(end)) {
             return 0;
         }
         return (int) ChronoUnit.DAYS.between(start, end);
     }
-
-
 }

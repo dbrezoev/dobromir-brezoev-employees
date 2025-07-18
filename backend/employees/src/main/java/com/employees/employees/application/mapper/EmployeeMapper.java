@@ -19,7 +19,9 @@ public class EmployeeMapper {
             .map(r -> {
                 var startDate = LocalDate.parse(r.getDateFrom().trim());
                 var endDate = Optional.ofNullable(r.getDateTo())
-                        .map(d -> LocalDate.parse(r.getDateFrom().trim()))
+                        .map(String::trim)
+                        .filter(s -> !s.equalsIgnoreCase("NULL") && !s.isEmpty())
+                        .map(LocalDate::parse)
                         .orElse(LocalDate.now());
                return new Employee(r.getEmployeeId(), r.getProjectId(), new Period(startDate, endDate)) ;
             })

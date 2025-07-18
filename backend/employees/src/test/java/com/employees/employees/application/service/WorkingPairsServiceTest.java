@@ -16,22 +16,26 @@ class WorkingPairsServiceTest {
 
     private final WorkingPairsService workingPairsService = new WorkingPairsService();
 
-    private final LocalDate start = LocalDate.of(2025, 5, 11);
+    private final Long COMMON_PROJECT_ID = 2L;
+    private final int YEAR_2025 = 2025;
+    private final int MONTH_5 = 5;
+
+    private final LocalDate start = LocalDate.of(YEAR_2025, MONTH_5, 11);
     private final LocalDate end = start.plusDays(10);
-    private final Employee john = new Employee(1L, 2L, new Period(start, end));
+    private final Employee john = new Employee(1L, COMMON_PROJECT_ID, new Period(start, end));
 
-    private final LocalDate start2 = LocalDate.of(2025, 5, 1);
-    private final LocalDate end2 = LocalDate.of(2025, 5, 30);
-    private final Employee henry = new Employee(2L, 2L, new Period(start2, end2));
+    private final LocalDate start2 = LocalDate.of(YEAR_2025, MONTH_5, 1);
+    private final LocalDate end2 = LocalDate.of(YEAR_2025, MONTH_5, 30);
+    private final Employee henry = new Employee(COMMON_PROJECT_ID, 2L, new Period(start2, end2));
 
-    private final LocalDate start3 = LocalDate.of(2025, 5, 8);
-    private final LocalDate end3 = LocalDate.of(2025, 5, 20);
-    private final Employee maria = new Employee(3L, 2L, new Period(start3, end3));
+    private final LocalDate start3 = LocalDate.of(YEAR_2025, MONTH_5, 8);
+    private final LocalDate end3 = LocalDate.of(YEAR_2025, MONTH_5, 20);
+    private final Employee maria = new Employee(3L, COMMON_PROJECT_ID, new Period(start3, end3));
 
     @Test
     void extractWorkingPairs() {
 
-        final List<WorkingPair> result = workingPairsService.getWorkingPairs(List.of(john, henry, maria));
+        List<WorkingPair> result = workingPairsService.getWorkingPairs(List.of(john, henry, maria));
 
         Assertions.assertThat(result).hasSize(3);
         Assertions.assertThat(result)
@@ -43,33 +47,36 @@ class WorkingPairsServiceTest {
                                 );
     }
 
+
     @Test
-    void calculateOverlappingDaysForTheSamePeriod() {
-        var start = LocalDate.of(2025, 5, 11);
-        var end = start.plusDays(3);
+    void extractWorkingPairsWithExternalEmployee() {
 
-        var period1 = new Period(start, end);
-        var period2 = new Period(start, end);
+        var externalEmployee = new Employee(4L, 99L,
+                new Period(LocalDate.of(YEAR_2025, MONTH_5, 11), LocalDate.of(YEAR_2025, MONTH_5, 30)));
 
-        final int overlappingDays = workingPairsService.calculateOverlappingDays(period1, period2);
-        Assertions.assertThat(overlappingDays).isEqualTo(3L);
+        List<WorkingPair> result = workingPairsService.getWorkingPairs(List.of(john, henry, maria, externalEmployee));
+
+        Assertions.assertThat(result).hasSize(3);
     }
 
     @Test
-    void calculateOverlappingDaysFor17Days() {
-        var period1 = new Period(LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 17));
-        var period2 = new Period(LocalDate.of(2025, 4, 10), LocalDate.of(2025, 6, 11));
+    void twoEmployeesWorkedTogetherOnTwoProjects() {
 
-        final int overlappingDays = workingPairsService.calculateOverlappingDays(period1, period2);
-        Assertions.assertThat(overlappingDays).isEqualTo(6L);
-    }
+        Employee johnBefore = new Employee(john.id(), 10L,
+                new Period(LocalDate.of(2012, 10, 11), LocalDate.of(2012, 10, 21)));
 
-    @Test
-    void calculateOverlappingDaysForOneDay() {
-        var period1 = new Period(LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 17));
-        var period2 = new Period(LocalDate.of(2025, 5, 8), LocalDate.of(2025, 5, 12));
+        Employee mariaBefore = new Employee(maria.id(), 10L,
+                new Period(LocalDate.of(2012, 10, 1), LocalDate.of(2012, 10, 31)));
 
-        final int overlappingDays = workingPairsService.calculateOverlappingDays(period1, period2);
-        Assertions.assertThat(overlappingDays).isEqualTo(1L);
+        List<WorkingPair> result = workingPairsService.getWorkingPairs(List.of(johnBefore, mariaBefore, john, henry, maria));
+
+        Assertions.assertThat(result).hasSize(3);
+        Assertions.assertThat(result)
+                .extracting(WorkingPair::firstEmployeeId, WorkingPair::secondEmployeeId, WorkingPair::days)
+                .containsExactly(
+                        tuple(john.id(), maria.id(), 19),
+                        tuple(henry.id(), maria.id(), 12),
+                        tuple(john.id(), henry.id(), 10)
+                );
     }
 }

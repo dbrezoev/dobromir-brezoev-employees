@@ -242,6 +242,11 @@
           <button (click)="test()">TEST NOW</button>
           <input type="file" (change)="onFileSelected($event)" />
           <button (click)="onUpload()">Upload</button>
+
+          <div class="mb-3">
+            <label for="formFile" class="form-label">Default file input example</label>
+            <input class="form-control" type="file" id="formFile" (change)="onFileSelected($event)">
+          </div>
           <a
             class="pill"
             [href]="item.link"

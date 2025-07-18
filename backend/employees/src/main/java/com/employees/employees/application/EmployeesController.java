@@ -1,11 +1,13 @@
 package com.employees.employees.application;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.employees.employees.infrastructure.FileContentReader;
+import com.employees.employees.domain.WorkingPair;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(value = "/api/employees")
 @RequiredArgsConstructor
 public class EmployeesController {
-    private final FileContentReader contentReader;
+    private final EmployeesFacade facade;
 
     @GetMapping
     public ResponseEntity<?> test() {
@@ -24,13 +26,11 @@ public class EmployeesController {
     }
 
     @PostMapping
-    public ResponseEntity<?> upload(@RequestParam MultipartFile file) {
-
+    public ResponseEntity<List<WorkingPair>> upload(@RequestParam MultipartFile file) {
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("File is empty");
+            throw new IllegalArgumentException("File is empty");
         }
 
-        contentReader.read(file);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(facade.calculateWorkingPairs(file));
     }
 }
