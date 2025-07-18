@@ -21,6 +21,8 @@ export class AppComponent {
   private fileService = inject(FileService);
   private destroyRef = inject(DestroyRef);
 
+  protected readonly supportedDateFormats = supportedDateFormats;
+
   fileInputRef  = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   selectedFormat = model<string>(supportedDateFormats[0].format);
   selectedFile = model<any>();
@@ -67,6 +69,4 @@ export class AppComponent {
       this.selectedFile.set(input.files[0]);
     }
   }
-
-  protected readonly supportedDateFormats = supportedDateFormats;
 }
