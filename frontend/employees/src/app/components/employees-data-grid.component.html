@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="d-flex fw-bold border-bottom py-2">
+    <div class="flex-fill">Employee ID #1</div>
+    <div class="flex-fill">Employee ID #2</div>
+    <div class="flex-fill">Total days</div>
+    <div class="flex-fill">Project Ids</div>
+  </div>
+  @for (entry of employeesResult(); track $index; let i = $index) {
+    <div class="d-flex border-bottom py-2">
+      <div class="flex-fill">{{entry.firstEmployeeId}}</div>
+      <div class="flex-fill">{{entry.secondEmployeeId}}</div>
+      <div class="flex-fill">{{entry.totalDays}}</div>
+      <div class="flex-fill">{{entry.projectIds | projects}}</div>
+    </div>
+  }
+</div>

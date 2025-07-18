@@ -31,8 +31,8 @@ public class EmployeeMapper {
                    return new Employee(r.getEmployeeId(), r.getProjectId(), new Period(startDate, endDate)) ;
 
                 } catch (DateTimeParseException e) {
-                    var message = String.format("Invalid date format in record with emplId: %d and projectId: %d. Expected format: %s",
-                            r.getEmployeeId(), r.getProjectId(), dateFormat);
+                    var message = String.format("Invalid date format in record with emplId: %d and projectId: %d.",
+                            r.getEmployeeId(), r.getProjectId());
                     throw new IllegalArgumentException(message, e);
                 }
             })

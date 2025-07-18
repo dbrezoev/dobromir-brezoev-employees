@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import com.employees.employees.domain.Employee;
 import com.employees.employees.domain.EmployeeCollaboration;
 import com.employees.employees.domain.Period;
-import com.employees.employees.domain.WorkingPair;
 
 class WorkingPairsServiceTest {
 

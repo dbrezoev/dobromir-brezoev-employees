@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.employees.employees.application.validation.SupportedDateFormats;
 import com.employees.employees.domain.EmployeeCollaboration;
 
 import lombok.RequiredArgsConstructor;
@@ -19,17 +20,15 @@ import lombok.RequiredArgsConstructor;
 public class EmployeesController {
     private final EmployeesFacade facade;
 
-    @GetMapping
-    public ResponseEntity<?> test() {
-        System.out.println("test");
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping
     public ResponseEntity<List<EmployeeCollaboration>> upload(@RequestParam MultipartFile file,
                                                               @RequestParam(defaultValue = "yyyy-MM-dd") String dateFormat) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
+        }
+
+        if (!SupportedDateFormats.isSupported(dateFormat)) {
+            throw new IllegalArgumentException("Invalid date format");
         }
 
         return ResponseEntity.ok(facade.calculateWorkingPairs(file, dateFormat));

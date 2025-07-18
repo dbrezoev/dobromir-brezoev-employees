@@ -64,25 +64,6 @@ public class WorkingPairsService {
                 .toList();
 
         return result;
-
-//        Map<EmployeesPair, Integer> mergedSameEmployees = workingPairs
-//            .stream()
-//            .collect(Collectors.toMap(
-//                    wp -> new EmployeesPair(wp.firstEmployeeId(), wp.secondEmployeeId()),
-//                    WorkingPair::days,
-//                    Integer::sum
-//            ));
-//
-//        return mergedSameEmployees
-//                .entrySet()
-//                .stream()
-//                .map(e -> {
-//                    long firstEmployeeId = e.getKey().firstEmployeeId();
-//                    long secondEmployeeId = e.getKey().secondEmployeeId();
-//                    return new WorkingPair(Math.min(firstEmployeeId, secondEmployeeId), Math.max(firstEmployeeId, secondEmployeeId), e.getValue());
-//                })
-//                .sorted(Comparator.comparingInt(WorkingPair::days).reversed())
-//                .toList();
     }
 
     private record EmployeesPair(long firstEmployeeId,  long secondEmployeeId) {}

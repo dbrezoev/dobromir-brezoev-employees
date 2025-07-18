@@ -1,54 +1,72 @@
-import { Component, inject, model } from '@angular/core';
+import { Component, DestroyRef, effect, ElementRef, inject, model, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FileService } from './services/file.service';
 import { FormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EmployeesWorkingPair } from './model/employees-working-pair';
+import { EmployeesDataGridComponent } from './components/employees-data-grid.component';
+import { supportedDateFormats } from './model/supported-date-formats';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule],
+  imports: [RouterOutlet, FormsModule, EmployeesDataGridComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'employees';
+  title = 'Employees';
 
   private fileService = inject(FileService);
+  private destroyRef = inject(DestroyRef);
 
-  test() {
-    this.fileService.test().subscribe((res) => {
-      console.log('eto: ', res);
-    })
+  fileInputRef  = viewChild<ElementRef<HTMLInputElement>>('fileInput');
+  selectedFormat = model<string>(supportedDateFormats[0].format);
+  selectedFile = model<any>();
+  result: EmployeesWorkingPair[] = [];
+
+  constructor() {
+    effect(() => {
+      const format = this.selectedFormat();
+      this.resetFile();
+      this.result = [];
+    }, {
+      allowSignalWrites: true,
+    });
+
+    effect(() => {
+      if (!this.selectedFile()) {
+        return;
+      }
+
+      this.fileService.uploadFile(this.selectedFile(), this.selectedFormat())
+        .pipe(
+          debounceTime(400),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe({
+          next: (res: EmployeesWorkingPair[]) => this.result = res,
+          error: err => alert(err.error),
+          complete: () => {}
+        });
+    });
   }
 
-  selectedFile = model<any>();
+  resetFile() {
+    this.selectedFile.set(null);
+    const input = this.fileInputRef()?.nativeElement;
+    if (input) {
+      input.value = '';
+    }
+  }
 
-  onFileSelected($event: Event) {
+  onFileSelected($event: Event): void {
     const input = $event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile.set(input.files[0]);
     }
   }
 
-  dateFormats = [
-    { dateFormat: 'dd/MM/yyyy', label: '17/07/2025 (dd/MM/yyyy)' },
-    { dateFormat: 'MM/dd/yyyy', label: '07/17/2025 (MM/dd/yyyy)' },
-    { dateFormat: 'yyyy-MM-dd', label: '2025-07-17 (yyyy-MM-dd)' },
-    { dateFormat: 'dd-MM-yyyy', label: '17-07-2025 (dd-MM-yyyy)' },
-    { dateFormat: 'MM-dd-yyyy', label: '07-17-2025 (MM-dd-yyyy)' },
-    { dateFormat: 'dd.MM.yyyy', label: '17.07.2025 (dd.MM.yyyy)' },
-    { dateFormat: 'yyyy/MM/dd', label: '2025/07/17 (yyyy/MM/dd)' },
-    { dateFormat: 'yyyy.MM.dd', label: '2025.07.17 (yyyy.MM.dd)' }
-  ];
-
-  selectedFormat = this.dateFormats[0].dateFormat;
-
-  onUpload(): void {
-    // if (!this.selectedFile()) return;
-
-    this.fileService.uploadFile(this.selectedFile(), this.selectedFormat)
-      .subscribe((res) => {
-        console.log('here: ', res);
-      });
-  }
+  protected readonly supportedDateFormats = supportedDateFormats;
 }

@@ -27,10 +27,10 @@ public class EmployeesFacade {
     private final WorkingPairsService workingPairsService;
 
     public List<EmployeeCollaboration> calculateWorkingPairs(MultipartFile file, String dateFormat) {
-        return contentReader.read(file, reader -> getWorkingPairs(reader, dateFormat));
+        return contentReader.read(file, reader -> processFile(reader, dateFormat));
     }
 
-    private List<EmployeeCollaboration> getWorkingPairs(BufferedReader reader, String dateFormat) {
+    private List<EmployeeCollaboration> processFile(BufferedReader reader, String dateFormat) {
         List<CsvRecord> csvRecords = csvParser.parse(reader, csvConfig);
         List<Employee> employees = employeeMapper.fromCsvRecords(csvRecords, dateFormat);
         return workingPairsService.getWorkingPairs(employees);
