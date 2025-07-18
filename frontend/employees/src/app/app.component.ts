@@ -24,7 +24,7 @@ export class AppComponent {
   protected readonly supportedDateFormats = supportedDateFormats;
 
   fileInputRef  = viewChild<ElementRef<HTMLInputElement>>('fileInput');
-  selectedFormat = model<string>(supportedDateFormats[0].format);
+  selectedFormat = model<string>(supportedDateFormats[0].label);
   selectedFile = model<any>();
   result: EmployeesWorkingPair[] = [];
 

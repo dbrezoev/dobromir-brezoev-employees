@@ -53,7 +53,7 @@
           <label for="dateFormat">Select date format used in the csv file:</label>
           <select class="form-select" [(ngModel)]="selectedFormat" name="dateFormat" id="dateFormat">
             @for (dateFormat of supportedDateFormats; track dateFormat) {
-              <option [value]="dateFormat.format">
+              <option [value]="dateFormat.label">
                 {{ dateFormat.label }} ({{dateFormat.example}})
               </option>
             }
