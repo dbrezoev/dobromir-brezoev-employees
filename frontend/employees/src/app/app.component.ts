@@ -48,7 +48,12 @@ export class AppComponent {
           takeUntilDestroyed(this.destroyRef)
         )
         .subscribe({
-          next: (res: EmployeesWorkingPair[]) => this.result = res,
+          next: (res: EmployeesWorkingPair[]) => {
+            this.result = res;
+            if (res.length === 0) {
+              alert('No pairs found.');
+            }
+          },
           error: err => alert(err.error),
           complete: () => {}
         });
